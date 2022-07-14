@@ -5,7 +5,7 @@
 #         Renato Naves Fleury,         nUSP: 11805269   #
 #########################################################
 
-from cmath import pi
+# from cmath import pi
 import numpy as np
 import math
 from matplotlib import pyplot as plt
@@ -173,10 +173,25 @@ def phi(L, n, x, p, q, f):
         phi += coeficiente[i] * base[i]
     return phi
 
+
 #########################################################
 # Validações                                            #
 #########################################################
-def validacao_1():
+def colors(x):
+    if (x==7):
+        return 'tab:orange'
+    elif (x==15):
+        return 'tab:red'
+    elif (x==31):
+        return 'tab:brown'
+    elif (x==63):
+        return 'tab:green'
+    else:
+        return 'tab:blue'
+    
+#########################################################
+#Teste de validação do ítem 4.2 do enunciado
+def validacao_1(): 
     L=1
     def p(x): # k(x)
         return 1
@@ -189,19 +204,55 @@ def validacao_1():
     
     valores_n = np.array([7, 15, 31, 63])
     print("\nTeste de validação 1:\n")
+    print("\tParâmetros utilizados: \n\t L = 1 \n\t a = 0 \n\t b = 0 \n\t k(x) = 1 \n\t q(x) = 0 \n\t f(x) = 12x(1-x) - 2 \n")
+    
+    print("Diferenças máximas entre a aproximação e a solução exata analisando apenas os pontos x_i com 1<=i<=n:\n")
     for n in valores_n:
         h = L/(n+1)
-        dif = np.zeros(n+1)
+        x = np.zeros(n+1)
+        y1 = np.zeros(n+1)
+        y2 = np.zeros(n+1)    
+        dif1 = np.zeros(n+1)
         for i in range (n+1):
-            a = solucao((h/2)*(1+2*i))
-            b = phi(L,n,(h/2)*(1+2*i),p,q,f)
-            #print("\t Solução exata = {:0.6f} \t Aproximação = {:0.6f} \t Diferença = {:0.6f}".format(a,b,math.sqrt((a-b)**2)))
-            dif[i] = math.sqrt((a-b)**2)
-        maximo = dif.max()
+            x[i] = i*h
+            y1[i] = solucao(x[i])
+            y2[i] = phi(L,n,x[i],p,q,f)
+            dif1[i] = y1[i] - y2[i]
+        maximo1 = dif1.max()
+        print("\tn = {} \t Diferença máxima = {:0.22f}".format(n,maximo1))
+        plt.plot(x,y2,'-',c=colors(n),label=f'n = {n}',markersize=2)
+    plt.grid()
+    plt.legend()
+    plt.title("Distribuição da temperatura em um chip de silício")
+    plt.xlabel("Posição [mm]")
+    plt.ylabel("Temperatura [K]")    
+    plt.show()
         
-        print("n = {} \t Diferença máxima = {:0.10f}".format(n,maximo))
-        
-def validacao_2():
+    print("\nDiferenças máximas entre a aproximação e a solução exata analisando 100 valores de x (igualmente espaçados) em toda a curva de aproximação para cada valor de n:\n")
+    x = np.arange(2,22)
+    y = np.zeros(20)
+    k=0
+    for n in range(2,22):
+        dif2 = np.zeros(100*L + 1)
+        for i in range(0,100*L + 1):
+            dif2[i] = math.sqrt((solucao(i/(100))-phi(L,n,i/(100),p,q,f))**2)
+        maximo2 = dif2.max()
+        y[k] = maximo2
+        print("\tn = {} \t Diferença máxima = {:0.22f}".format(n,maximo2))
+        k+=1
+    plt.plot(x,y,marker="o")
+    plt.grid()
+    plt.title("Erro máximo da aproximação em função de n")
+    plt.xlabel("Valor de n")
+    plt.ylabel("Erro máximo")
+    plt.xticks(x)
+    plt.show()
+    main()
+    
+#########################################################
+# Teste de validação complementar do ítem 4.2 do 
+# enunciado:
+def validacao_2(): 
     L=1
     def p(x): # k(x)
         return (np.e**x)
@@ -212,27 +263,64 @@ def validacao_2():
     def solucao(x):
         return ((x-1)*(np.e**(-x) - 1))
     
-    valores_n = np.array([7, 15, 31, 63])
+    valores_n = np.array([7, 15, 31, 64])
     print("\nTeste de validação 2:\n")
+    print("\tParâmetros utilizados: \n\t L = 1 \n\t a = 0 \n\t b = 0 \n\t k(x) = e^x \n\t q(x) = 0 \n\t f(x) = e^x + 1 \n")
+    
+    print("Diferenças máximas entre a aproximação e a solução exata analisando apenas os pontos x_i com 1<=i<=n:\n")
     for n in valores_n:
         h = L/(n+1)
-        dif = np.zeros(n+1)
+        x = np.zeros(n+1)
+        y1 = np.zeros(n+1)
+        y2 = np.zeros(n+1)    
+        dif1 = np.zeros(n+1)
         for i in range (n+1):
-            a = solucao((h/2)*(1+2*i))
-            b = phi(L,n,(h/2)*(1+2*i),p,q,f)
-            #print("\t Solução exata = {:0.6f} \t Aproximação = {:0.6f} \t Diferença = {:0.6f}".format(a,b,math.sqrt((a-b)**2)))
-            dif[i] = math.sqrt((a-b)**2)
-        maximo = dif.max()
-        print("n = {} \t Diferença máxima = {:0.10f}".format(n,maximo))
+            x[i] = i*h
+            y1[i] = solucao(x[i])
+            y2[i] = phi(L,n,x[i],p,q,f)
+            dif1[i] = y1[i] - y2[i]
+        maximo1 = dif1.max()
+        print("\tn = {} \t Diferença máxima = {:0.22f}".format(n,maximo1))
+        plt.plot(x,y2,'-',c=colors(n),label=f'n = {n}',markersize=2)
+    plt.grid()
+    plt.legend()
+    plt.title("Distribuição da temperatura em um chip de silício")
+    plt.xlabel("Posição [mm]")
+    plt.ylabel("Temperatura [K]")    
+    plt.show()
         
+    print("\nDiferenças máximas entre a aproximação e a solução exata analisando 100 valores de x (igualmente espaçados) em toda a curva de aproximação para cada valor de n:\n")
+    x = np.arange(2,22)
+    y = np.zeros(20)
+    k=0
+    for n in range(2,22):
+        dif2 = np.zeros(100*L + 1)
+        for i in range(0,100*L + 1):
+            dif2[i] = math.sqrt((solucao(i/(100))-phi(L,n,i/(100),p,q,f))**2)
+        maximo2 = dif2.max()
+        y[k] = maximo2
+        print("\tn = {} \t Diferença máxima = {:0.22f}".format(n,maximo2))
+        k+=1
+    plt.plot(x,y,marker="o")
+    plt.grid()
+    plt.title("Erro máximo da aproximação em função de n")
+    plt.xlabel("Valor de n")
+    plt.ylabel("Erro máximo")
+    plt.xticks(x)
+    plt.show()
+    main()
+    
+#########################################################
+# Simulação da situação de equilíbrio com forçantes de
+# calor para o caso de resfriamento uniforme:
 def forcante_calor_1():
-    L=1
-    n = 100
+    L=20
+    n = 63
     a = 273
     b = 273
-    sigma = 1
-    Q0_menos = 0.4
-    Q0_mais = 0.9
+    sigma = 2.5
+    Q0_menos = 2.3
+    Q0_mais = 10
     def p(x): # k(x)
         return 3.6
     def q(x):
@@ -240,28 +328,36 @@ def forcante_calor_1():
     def f(x):
         return (Q0_mais * np.e**(-((x-(L/2))/sigma)**2) - Q0_menos)
     print("Teste de equilíbrio com forçantes de calor (Resfriamento uniforme): \n")
-    print("\tParâmetros utilizados: \n\t L = {} \n\t n = {} \n\t a = {} \n\t b = {} \n\t sigma = {} \n\t Q0+ = {} \n\t Q0- = {} \n".format(L,n,a,b,sigma,Q0_mais,Q0_menos))
+    print("\tParâmetros utilizados: \n\t L = {} \n\t n = {} \n\t a = {} \n\t b = {} \n\t sigma = {} \n\t Q0+ = {} \n\t Q0- = {}".format(L,n,a,b,sigma,Q0_mais,Q0_menos))
     h = L/(n+1)
-    x = np.zeros(n+1)
-    y = np.zeros(n+1)
+    x = np.zeros(n+2)
+    y = np.zeros(n+2)
     for i in range (n+1):
-        x[i] = (h/2)*(1+2*i)
-        y[i] = phi(L,n,x[i],p,q,f) + a + (b-a)*x[i]
+        x[i] = i*h
+        y[i] = phi(L,n,x[i],p,q,f) + a + (b-a)*x[i]/L
         #print("\t x = {:0.6f}\t Temperatura = {:0.6f}".format(x[i],y[i]))
+    x[n+1] = L
+    y[n+1] = b
     plt.plot(x, y)
     plt.title("Distribuição da temperatura no eixo x de um chip de silício")
     plt.xlabel("Posição [mm]")
     plt.ylabel("Temperatura [K]")
+    plt.grid()
     plt.show()
-    
+    main()
+
+#########################################################
+# Simulação da situação de equilíbrio com forçantes de
+# calor para o caso de resfriamento com modelagem 
+# anaáloga ao aquecimento:
 def forcante_calor_2():
-    L=1
+    L=20
     n = 100
     a = 273
     b = 273
-    sigma = 1
+    sigma = 5
     Q0_menos = 0.4
-    Q0_mais = 0.9
+    Q0_mais = 6
     def p(x): # k(x)
         return 3.6
     def q(x):
@@ -269,27 +365,35 @@ def forcante_calor_2():
     def f(x):
         return (Q0_mais*np.e**(-((x-(L/2))/sigma)**2) - Q0_menos*np.e**(-((x-(L/2))/sigma)**2))
     print("Teste de equilíbrio com forçantes de calor (Resfriamento modelado por Gaussiana): \n")
-    print("\tParâmetros utilizados: \n\t L = {} \n\t n = {} \n\t a = {} \n\t b = {} \n\t sigma = {} \n\t Q0+ = {} \n\t Q0- = {} \n".format(L,n,a,b,sigma,Q0_mais,Q0_menos))
+    print("\tParâmetros utilizados: \n\t L = {} \n\t n = {} \n\t a = {} \n\t b = {} \n\t sigma = {} \n\t Q0+ = {} \n\t Q0- = {}".format(L,n,a,b,sigma,Q0_mais,Q0_menos))
     h = L/(n+1)
-    x = np.zeros(n+1)
-    y = np.zeros(n+1)
+    x = np.zeros(n+2)
+    y = np.zeros(n+2)
     for i in range (n+1):
-        x[i] = (h/2)*(1+2*i)
-        y[i] = phi(L,n,x[i],p,q,f) + a + (b-a)*x[i]
+        x[i] = i*h
+        y[i] = phi(L,n,x[i],p,q,f) + a + (b-a)*x[i]/L
         #print("\t x = {:0.6f}\t Temperatura = {:0.6f}".format(x[i],y[i]))
+    x[n+1] = L
+    y[n+1] = b
     plt.plot(x, y)
     plt.title("Distribuição da temperatura no eixo x de um chip de silício")
     plt.xlabel("Posição [mm]")
     plt.ylabel("Temperatura [K]")
+    plt.grid()
     plt.show()
-    
+    main()
+
+#########################################################
+# Simulação da situação de equilíbrio com forçantes de
+# calor para o caso de resfriamento mais acentuado 
+# mais próximo dos extremos:
 def forcante_calor_3():
-    L=1
+    L=20
     n = 100
     a = 273
     b = 273
-    sigma = 1
-    Q0_menos = 0.4
+    sigma = 10
+    Q0_menos = 0.75
     Q0_mais = 0.9
     def p(x): # k(x)
         return 3.6
@@ -298,29 +402,36 @@ def forcante_calor_3():
     def f(x):
         return (Q0_mais*np.e**(-((x-(L/2))/sigma)**2) - Q0_menos*(np.e**(-(x/sigma)**2) + np.e**(-((x-L)/sigma)**2)))
     print("Teste de equilíbrio com forçantes de calor (Resfriamento acentuado nas extremidades): \n")
-    print("\tParâmetros utilizados: \n\t L = {} \n\t n = {} \n\t a = {} \n\t b = {} \n\t sigma = {} \n\t Q0+ = {} \n\t Q0- = {} \n".format(L,n,a,b,sigma,Q0_mais,Q0_menos))
+    print("\tParâmetros utilizados: \n\t L = {} \n\t n = {} \n\t a = {} \n\t b = {} \n\t sigma = {} \n\t Q0+ = {} \n\t Q0- = {}".format(L,n,a,b,sigma,Q0_mais,Q0_menos))
     h = L/(n+1)
-    x = np.zeros(n+1)
-    y = np.zeros(n+1)
+    x = np.zeros(n+2)
+    y = np.zeros(n+2)
     for i in range (n+1):
-        x[i] = (h/2)*(1+2*i)
-        y[i] = phi(L,n,x[i],p,q,f) + a + (b-a)*x[i]
+        x[i] = i*h
+        y[i] = phi(L,n,x[i],p,q,f) + a + (b-a)*x[i]/L
         #print("\t x = {:0.6f}\t Temperatura = {:0.6f}".format(x[i],y[i]))
+    x[n+1] = L
+    y[n+1] = b
     plt.plot(x, y)
     plt.title("Distribuição da temperatura no eixo x de um chip de silício")
     plt.xlabel("Posição [mm]")
     plt.ylabel("Temperatura [K]")
+    plt.grid()
     plt.show()
-    
+    main()
+
+#########################################################
+# Simulaçao da situação com variação do material na qual
+# o material que envolve o chip é o alumínio:
 def variacao_material():
-    L=1
+    L=20
     n = 100
     a = 273
     b = 273
-    d = L/4
-    sigma = 1
-    Q0_menos = 0.4
-    Q0_mais = 0.9
+    d = L/5
+    sigma = 2
+    Q0_menos = 0.5
+    Q0_mais = 5
     def p(x): # k(x)
         if (x>(L/2 - d) and x<(L/2 + d)):
             return 3.6
@@ -331,23 +442,48 @@ def variacao_material():
     def f(x):
         return (Q0_mais * np.e**(-((x-(L/2))/sigma)**2) - Q0_menos)
     print("Teste de equilíbrio com variação do material: \n")
-    print("\tParâmetros utilizados: \n\t L = {} \n\t n = {} \n\t a = {} \n\t b = {} \n\t d = {} \n\t sigma = {} \n\t Q0+ = {} \n\t Q0- = {} \n".format(L,n,a,b,d,sigma,Q0_mais,Q0_menos))
+    print("\tParâmetros utilizados: \n\t L = {} \n\t n = {} \n\t a = {} \n\t b = {} \n\t d = {} \n\t sigma = {} \n\t Q0+ = {} \n\t Q0- = {}".format(L,n,a,b,d,sigma,Q0_mais,Q0_menos))
     h = L/(n+1)
-    x = np.zeros(n+1)
-    y = np.zeros(n+1)
+    x = np.zeros(n+2)
+    y = np.zeros(n+2)
     for i in range (n+1):
-        x[i] = (h/2)*(1+2*i)
-        y[i] = phi(L,n,x[i],p,q,f) + a + (b-a)*x[i]
+        x[i] = i*h
+        y[i] = phi(L,n,x[i],p,q,f) + a + (b-a)*x[i]/L
         #print("\t x = {:0.6f}\t Temperatura = {:0.6f}".format(x[i],y[i]))
+    x[n+1] = L
+    y[n+1] = b
     plt.plot(x, y)
     plt.title("Distribuição da temperatura no eixo x de um chip de silício")
     plt.xlabel("Posição [mm]")
     plt.ylabel("Temperatura [K]")
+    plt.grid()
     plt.show()
-        
-validacao_1()
-validacao_2()
-forcante_calor_1()
-forcante_calor_2()
-forcante_calor_3()
-variacao_material()
+    main()
+
+    
+def main():
+    print("\nSimulções exploradas:\n")
+    print("\t1 - Teste de validação do ítem 4.2 do enunciado.")
+    print("\t2 - Teste de validação complementar do ítem 4.2 do enunciado.")
+    print("\t3 - Simulação da situação de equilíbrio com forçantes de calor com resfriamento uniforme.")
+    print("\t4 - Simulação da situação de equilíbrio com forçantes de calor com resfriamento com modelagem análoga ao aquecimento.")
+    print("\t5 - Simulação da situação de equilíbrio com forçantes de calor com resfriamento acentuado nas extremidades.")
+    print("\t6 - Simulação da situação de equilíbrio com variação de material.")
+    a = int(input("\nDigite o número do teste a ser simulado: "))
+    if (a == 1):
+        validacao_1()
+    elif (a == 2):
+        validacao_2()
+    elif (a == 3):
+        forcante_calor_1()
+    elif (a == 4):
+        forcante_calor_2()
+    elif (a == 5):
+        forcante_calor_3()
+    elif (a == 6):
+        variacao_material()
+    else:
+        print("Por favor, insira um numero valido")
+        main()
+main()
+          
